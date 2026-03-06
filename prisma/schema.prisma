@@ -1,0 +1,392 @@
+// SalahVerse - Premium Portfolio Platform Database Schema
+// Supports public portfolio + admin CMS with full design control
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String?
+  role          String   @default("admin")
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ============================================
+// PROJECTS & PORTFOLIO
+// ============================================
+
+model Project {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  titleAr         String?
+  summary         String
+  summaryAr       String?
+  description     String   @default("")
+  descriptionAr   String?
+  problem         String?
+  problemAr       String?
+  solution        String?
+  solutionAr      String?
+  technicalApproach String?
+  technicalApproachAr String?
+  impact          String?
+  impactAr        String?
+  category        String   @default("automation")
+  tags            String   @default("")
+  status          String   @default("published")
+  featured        Boolean  @default(false)
+  order           Int      @default(0)
+  coverImage      String?
+  images          String   @default("[]")
+  videos          String   @default("[]")
+  attachments     String   @default("[]")
+  clientName      String?
+  projectDate     String?
+  duration        String?
+  technologies    String   @default("[]")
+  liveUrl         String?
+  githubUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  media           ProjectMedia[]
+}
+
+model ProjectMedia {
+  id          String   @id @default(cuid())
+  projectId   String
+  type        String   // image, video, file
+  url         String
+  title       String?
+  titleAr     String?
+  description String?
+  descriptionAr String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// SERVICES
+// ============================================
+
+model Service {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  titleAr         String?
+  description     String
+  descriptionAr   String?
+  icon            String?
+  features        String   @default("[]")
+  featuresAr      String?
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// CASE STUDIES
+// ============================================
+
+model CaseStudy {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  titleAr         String?
+  client          String?
+  industry        String?
+  challenge       String
+  challengeAr     String?
+  solution        String
+  solutionAr      String?
+  implementation  String
+  implementationAr String?
+  results         String
+  resultsAr       String?
+  beforeState     String?
+  beforeStateAr   String?
+  afterState      String?
+  afterStateAr    String?
+  metrics         String   @default("[]")
+  images          String   @default("[]")
+  videos          String   @default("[]")
+  tags            String   @default("[]")
+  featured        Boolean  @default(false)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// DYNAMIC PAGES & BLOCKS
+// ============================================
+
+model Page {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  titleAr         String?
+  metaDescription String?
+  metaDescriptionAr String?
+  template        String   @default("default")
+  isPublished     Boolean  @default(false)
+  showInNav       Boolean  @default(false)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  blocks          PageBlock[]
+}
+
+model PageBlock {
+  id          String   @id @default(cuid())
+  pageId      String
+  type        String   // title, paragraph, image, video, gallery, cards, cta, file, quote, stats
+  content     String   @default("{}")
+  contentAr   String?
+  order       Int      @default(0)
+  settings    String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// SKILLS & EXPERTISE
+// ============================================
+
+model Skill {
+  id              String   @id @default(cuid())
+  name            String
+  nameAr          String?
+  category        String   @default("technical")
+  level           Int      @default(80)
+  icon            String?
+  description     String?
+  descriptionAr   String?
+  order           Int      @default(0)
+  isVisible       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// CHATBOT CONFIGURATION
+// ============================================
+
+model ChatbotConfig {
+  id              String   @id @default(cuid())
+  mode            String   @default("predefined") // predefined, external_api
+  systemPrompt    String?
+  systemPromptAr  String?
+  tone            String   @default("professional")
+  language        String   @default("en")
+  
+  // External API settings
+  apiEndpoint     String?
+  apiKey          String?
+  apiMethod       String   @default("POST")
+  apiHeaders      String?
+  apiPayloadMap   String?
+  apiResponseMap  String?
+  apiTimeout      Int      @default(30000)
+  apiRetries      Int      @default(3)
+  
+  // Behavior settings
+  greetingMessage String?
+  greetingMessageAr String?
+  fallbackMessage String?
+  fallbackMessageAr String?
+  forbiddenTopics String?
+  escalationTrigger String?
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  presets         ChatbotPreset[]
+  conversations   ChatbotConversation[]
+}
+
+model ChatbotPreset {
+  id              String   @id @default(cuid())
+  configId        String
+  trigger         String   // keyword or pattern
+  triggerType     String   @default("exact") // exact, contains, regex
+  response        String
+  responseAr      String?
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  config          ChatbotConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+}
+
+model ChatbotConversation {
+  id          String   @id @default(cuid())
+  configId    String?
+  sessionId   String
+  messages    String   @default("[]")
+  leadInfo    String?
+  isConverted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  config      ChatbotConfig? @relation(fields: [configId], references: [id])
+}
+
+// ============================================
+// CONTACT & LEADS
+// ============================================
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  subject     String?
+  message     String
+  type        String   @default("general") // general, project_inquiry, collaboration
+  status      String   @default("new") // new, read, responded, archived
+  source      String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// SITE SETTINGS & DESIGN SYSTEM
+// ============================================
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  valueAr     String?
+  type        String   @default("text") // text, json, boolean, number
+  group       String   @default("general") // general, hero, about, contact, seo
+  updatedAt   DateTime @updatedAt
+}
+
+model DesignSetting {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  value           String
+  type            String   @default("color") // color, typography, spacing, border, shadow
+  group           String   @default("general")
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// NAVIGATION & MENUS
+// ============================================
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  label       String
+  labelAr     String?
+  url         String
+  target      String   @default("_self")
+  order       Int      @default(0)
+  parentId    String?
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  children    MenuItem[]  @relation("MenuHierarchy")
+  parent      MenuItem?   @relation("MenuHierarchy", fields: [parentId], references: [id])
+}
+
+// ============================================
+// TRANSLATIONS
+// ============================================
+
+model Translation {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  valueEn     String
+  valueAr     String?
+  group       String   @default("general")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// MEDIA LIBRARY
+// ============================================
+
+model MediaFile {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  altText     String?
+  altTextAr   String?
+  folder      String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+}
+
+// ============================================
+// SECTIONS CONFIGURATION
+// ============================================
+
+model Section {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  title       String?
+  titleAr     String?
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  settings    String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// HERO CONTENT
+// ============================================
+
+model HeroContent {
+  id              String   @id @default(cuid())
+  headline        String
+  headlineAr      String?
+  subheadline     String
+  subheadlineAr   String?
+  description     String?
+  descriptionAr   String?
+  primaryCta      String?
+  primaryCtaAr    String?
+  primaryCtaUrl   String?
+  secondaryCta    String?
+  secondaryCtaAr  String?
+  secondaryCtaUrl String?
+  backgroundType  String   @default("gradient") // gradient, image, video
+  backgroundValue String?
+  animationType   String   @default("particles")
+  isActive        Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
+}
