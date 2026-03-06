@@ -1,4 +1,4 @@
-# 🚀 Welcome to Z.ai Code Scaffold
+# 🚀 Welcome to SalahVerse Code Scaffold
 
 A modern, production-ready web application scaffold powered by cutting-edge technologies, designed to accelerate your development with [Z.ai](https://chat.z.ai)'s AI-powered coding assistance.
 
@@ -82,7 +82,6 @@ This scaffold is optimized for use with [Z.ai](https://chat.z.ai) - your AI assi
 - **📝 Documentation** - Auto-generate comprehensive documentation
 - **🚀 Optimization** - Performance improvements and best practices
 
-Ready to build something amazing? Start chatting with Z.ai at [chat.z.ai](https://chat.z.ai) and experience the future of AI-powered development!
 
 ## 📁 Project Structure
 
